@@ -2,7 +2,7 @@
 
 ## System purpose and scope
 
-PawPal+ is a pet-care planning assistant built on top of the original deterministic PawPal+ scheduler. Its Ask PawPal feature retrieves short, curated local care notes and combines them with the owner's current task schedule before sending a planning question to Gemini 2.5 Flash. It is designed to help an owner organize routine care; it is not designed to diagnose illness, prescribe medication, or replace professional veterinary care.
+PawPal+ is a pet-care planning assistant built on top of the original deterministic PawPal+ scheduler. Its Ask PawPal feature retrieves short, curated local care notes and combines them with the owner's current task schedule before sending a planning question to Gemini 3.5 Flash-Lite. It is designed to help an owner organize routine care; it is not designed to diagnose illness, prescribe medication, or replace professional veterinary care.
 
 ## Limitations and potential biases
 

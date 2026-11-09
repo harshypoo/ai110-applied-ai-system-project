@@ -18,7 +18,7 @@ This project evolves my Module 2 project, **PawPal+**, a Streamlit app for organ
 
 ## Architecture overview
 
-The [system architecture diagram](diagrams/architecture.mmd) shows the full flow. A pet owner submits a question in Streamlit; PawPal validates it, builds task context, retrieves relevant local care notes, and sends both to Gemini 2.5 Flash. The answer and source notes return to the owner for review. Urgent-care guardrails bypass Gemini, while automated tests check retrieval, guardrails, and missing-key behavior; logs record success or failure without storing the question itself.
+The [system architecture diagram](diagrams/architecture.mmd) shows the full flow. A pet owner submits a question in Streamlit; PawPal validates it, builds task context, retrieves relevant local care notes, and sends both to Gemini 3.5 Flash-Lite. The answer and source notes return to the owner for review. Urgent-care guardrails bypass Gemini, while automated tests check retrieval, guardrails, and missing-key behavior; logs record success or failure without storing the question itself.
 
 ## Project structure
 
@@ -90,9 +90,19 @@ streamlit run app.py
 
 Create an owner and pet, add one or more care tasks, then use **Ask PawPal** near the bottom of the page.
 
-## Sample interactions
+## Reproducible execution evidence
 
-Gemini wording can vary between runs. These examples show the expected behavior and the schedule/source context that PawPal provides.
+Install dependencies, configure a local Gemini key as described above, then run the documented end-to-end cases:
+
+```bash
+python examples/run_evidence.py
+```
+
+The complete captured output is stored in [evidence/final_execution.md](evidence/final_execution.md). Gemini wording can vary between runs, but the response status, retrieved-source labels, and guardrail behavior should remain consistent.
+
+## Observed sample interactions
+
+The following two live RAG outputs and guardrail output were captured with the documented demo schedule.
 
 ### 1. Schedule-aware medication reminder
 
@@ -102,10 +112,14 @@ Gemini wording can vary between runs. These examples show the expected behavior 
 How can I organize Mochi's medication reminder with breakfast?
 ```
 
-**Example result**
+**Observed output**
 
 ```text
-If Mochi already has breakfast scheduled, keep the medication reminder at that same routine point only if that matches the veterinarian's instructions. Add a separate, clearly named medication task so it can be marked complete independently. PawPal can help you avoid a duplicate time-slot conflict, but contact the prescribing veterinarian if you missed a dose or need medication guidance.
+Hello! As PawPal, I can help you organize Mochi’s routine.
+
+Since both Mochi's breakfast and medication reminder are already scheduled for 08:00 daily, keeping them tied to the same time maintains a predictable schedule for everyday consistency.
+
+The retrieved notes do not support medical advice. I cannot recommend specific dosages, substitute medications, or treatment changes. Use medications as directed by Mochi's veterinarian.
 
 Sources retrieved: Medication safety; Routine consistency
 ```
@@ -115,13 +129,13 @@ Sources retrieved: Medication safety; Routine consistency
 **Input**
 
 ```text
-What should I consider before adding an evening enrichment task for Biscuit?
+What should I consider before adding an evening enrichment task for Mochi?
 ```
 
-**Example result**
+**Observed output**
 
 ```text
-Review Biscuit's existing evening tasks first, then choose an activity that matches Biscuit's species, age, mobility, and comfort. Start with a short supervised activity and adjust based on how Biscuit responds. Add it as a separate one-time or recurring task so the plan stays visible.
+Before adding an evening enrichment task for Mochi, choose an activity that fits Mochi's species, age, mobility, and observed comfort level. Introduce unfamiliar activities gradually, supervise Mochi, and stop if Mochi appears distressed. Make the change observable and note how Mochi responds.
 
 Source retrieved: Enrichment and observation
 ```
@@ -134,7 +148,7 @@ Source retrieved: Enrichment and observation
 My pet is having trouble breathing. What should I do?
 ```
 
-**Result**
+**Observed output**
 
 ```text
 This may be urgent. Contact an emergency veterinarian or local emergency service now. PawPal cannot diagnose an emergency or replace professional veterinary care.
@@ -147,7 +161,7 @@ For this input, PawPal does **not** call Gemini; the guardrail takes priority.
 | Decision | Why | Trade-off |
 | --- | --- | --- |
 | Local JSON knowledge base with keyword retrieval | It is transparent, small, easy to inspect, and ensures the model sees relevant project-provided context. | Keyword matching is less flexible than embedding search and may miss differently worded questions. |
-| Gemini 2.5 Flash | It provides a fast, accessible text-generation option for a student project. | A live response requires an API key and depends on provider availability and limits. |
+| Gemini 3.5 Flash-Lite | It provides a low-latency, accessible text-generation option for a student project. | A live response requires an API key and depends on provider availability and limits. |
 | Guardrails before model generation | Urgent symptoms receive immediate escalation instead of a potentially unsafe generative response. | The term-based detector is intentionally narrow and can miss wording it does not recognize. |
 | Source display | It lets the owner inspect the notes that grounded the response. | The local notes are brief and are not a substitute for individualized veterinary advice. |
 | Existing deterministic scheduler remains separate | Sorting, conflicts, recurrence, and completion stay testable without an LLM. | PawPal does not let the model autonomously alter the schedule. |
@@ -173,7 +187,16 @@ The current suite has **25 passing tests**. It covers the original scheduler's s
 | Missing `GEMINI_API_KEY` | The app returns a configuration message instead of crashing. | Pass |
 | Full test suite | Scheduler and AI reliability checks complete successfully. | 25/25 passed |
 
-The intentionally unautomated portion is the live Gemini request: it requires a personal key, network access, and an active provider account. This is a limitation of the current evaluation approach; a future version should add recorded, human-reviewed test cases for live outputs and measure retrieval quality across a larger question set.
+The live Gemini workflow was manually exercised for the two planning cases in the execution log. It remains intentionally outside the automated suite because it requires a personal key, network access, and an active provider account. A future version should add a structured, human-reviewed set of live outputs and measure retrieval quality across a larger question set.
+
+## Portfolio artifact
+
+- **Code:** [github.com/harshypoo/ai110-applied-ai-system-project](https://github.com/harshypoo/ai110-applied-ai-system-project)
+- **What this project says about me as an AI engineer:** I build AI features as part of complete systems rather than treating a model call as the finished product. PawPal+ shows that I can extend an existing application, choose an inspectable RAG design, test deterministic behavior, handle failures safely, and communicate clear boundaries when an AI system should defer to a professional.
+
+## Presentation
+
+See [presentation_outline.md](presentation_outline.md) for a timed 5–7 minute presentation and live-demo script. A Loom walkthrough can be added here later for human reviewers; grading evidence is included in this README and the linked execution log.
 
 ## Brief reflection
 

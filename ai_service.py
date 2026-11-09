@@ -16,7 +16,7 @@ from pawpal_system import Owner, Scheduler
 
 LOGGER = logging.getLogger("pawpal.ai")
 KNOWLEDGE_PATH = Path(__file__).with_name("knowledge") / "pet_care_guidance.json"
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.5-flash-lite"
 URGENT_TERMS = {
     "bleeding",
     "collapse",
@@ -138,7 +138,10 @@ Answer as PawPal, a pet-care planning assistant. Use the schedule and retrieved 
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=api_key)
+        client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=20_000),
+        )
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=prompt,
