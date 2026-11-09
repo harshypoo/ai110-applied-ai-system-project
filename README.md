@@ -1,185 +1,173 @@
-# PawPal+ — Applied AI System Project
+# PawPal+ — RAG Pet-Care Planning Assistant
 
-PawPal+ is a Streamlit pet-care planner enhanced with **retrieval-augmented generation (RAG)**. Its Ask PawPal feature retrieves relevant, curated pet-care notes and the owner's current schedule before Gemini generates a planning response. This is an evolution of the earlier Module 2 scheduler.
+PawPal+ helps pet owners organize recurring care tasks and ask grounded planning questions about their current routine. It combines a Streamlit task planner with retrieval-augmented generation (RAG): before Gemini responds, PawPal retrieves relevant local care notes and sends them alongside the owner's actual task schedule. This makes the response more useful than a generic chatbot answer while keeping the original scheduler at the center of the experience.
 
-## AI system features
+> **Safety note:** PawPal+ is a planning aid, not veterinary medical advice. It does not diagnose conditions, recommend medication doses, or advise treatment changes. Urgent symptoms should be handled by a licensed veterinarian or emergency veterinary service.
 
-- **Integrated RAG:** `ai_service.py` retrieves relevant notes from `knowledge/pet_care_guidance.json`, supplies them with task context to Gemini, and shows the sources in the interface.
-- **Guardrails:** Urgent symptom terms bypass model generation and direct the owner to urgent veterinary help. The prompt prohibits diagnosis, medication-dose advice, and treatment-plan changes.
-- **Logging and failure handling:** The AI service logs event outcomes without logging the question text. Missing keys and Gemini errors show safe, actionable UI messages.
-- **Reliability tests:** `tests/test_ai_service.py` checks retrieval relevance, emergency guardrails, and missing-key behavior.
+## Original project: Module 2 PawPal+ scheduler
 
-See [the Mermaid architecture source](diagrams/architecture.mmd) for the component and data flow.
+This project evolves my Module 2 project, **PawPal+**, a Streamlit app for organizing pet-care tasks. The original application let an owner create pets, add dated one-time or recurring tasks, sort and filter a schedule, detect conflicting time slots, and mark tasks complete. Its goal was to turn a busy owner's basic care list into a clear, manageable routine.
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+## What changed in the applied-AI version
 
-## Scenario
+- **Ask PawPal:** An owner can ask a planning question directly in the app.
+- **Integrated RAG:** `ai_service.py` retrieves relevant notes from `knowledge/pet_care_guidance.json` before Gemini generates an answer.
+- **Schedule-aware responses:** The model receives the active owner's current tasks, so it can frame the answer around the schedule the user created.
+- **Transparent sources:** The app displays the retrieved notes below each response.
+- **Safety and resilience:** Urgent symptom terms bypass generation, missing keys and API failures produce useful messages, and the service logs outcomes without logging question text.
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+## Architecture overview
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+The [system architecture diagram](diagrams/architecture.mmd) shows the full flow. A pet owner submits a question in Streamlit; PawPal validates it, builds task context, retrieves relevant local care notes, and sends both to Gemini 2.5 Flash. The answer and source notes return to the owner for review. Urgent-care guardrails bypass Gemini, while automated tests check retrieval, guardrails, and missing-key behavior; logs record success or failure without storing the question itself.
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+## Project structure
 
-## What you will build
+```text
+.
+├── app.py                         # Streamlit interface
+├── pawpal_system.py               # Original task scheduling domain logic
+├── ai_service.py                  # RAG retrieval, guardrails, logging, Gemini call
+├── knowledge/
+│   └── pet_care_guidance.json     # Curated retrieval documents
+├── diagrams/
+│   └── architecture.mmd           # Mermaid system diagram source
+├── tests/
+│   ├── test_pawpal.py             # Scheduler tests
+│   └── test_ai_service.py         # RAG and safety tests
+├── .env.example                   # Safe environment-variable template
+└── requirements.txt
+```
 
-Your final app should:
+## Setup and run
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+### 1. Clone the repository
 
-## Features
+```bash
+git clone https://github.com/harshypoo/ai110-applied-ai-system-project.git
+cd ai110-applied-ai-system-project
+```
 
-- **Time-based sorting:** Orders validated `HH:MM` task times chronologically with `Scheduler.sort_by_time()`.
-- **Flexible filtering:** Shows tasks by pet, completion status, or both through `Scheduler.filter_tasks()`.
-- **Conflict warnings:** Detects incomplete tasks for the same pet that share a date-and-time slot, then returns a clear warning instead of stopping the app.
-- **Recurring care:** Identifies daily and weekly tasks. Completing one creates a fresh incomplete occurrence for tomorrow or the following week; one-time tasks are not recreated.
-- **Completion tracking:** Lets an owner mark care tasks complete while retaining the completed task in history.
-- **Date-aware task management:** Stores a scheduled date with every task so tasks at the same time on different dates do not conflict.
-- **Streamlit task planner:** Lets an owner create pets and tasks, filter the displayed plan, review recurring care, see conflict warnings, and complete tasks in the browser session.
-
-## Getting started
-
-### Setup
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate
+```
+
+On Windows PowerShell, use:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### Configure Gemini
+### 4. Configure Gemini
 
-1. Create a Gemini API key in Google AI Studio.
-2. Copy `.env.example` to a new local `.env` file.
-3. Set `GEMINI_API_KEY` in `.env`. Do not commit this file.
-4. Start the application:
+Create a Gemini API key in Google AI Studio. Copy the template, then add the key locally:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` so it contains:
+
+```text
+GEMINI_API_KEY=your_key_here
+```
+
+`.env` is ignored by Git; never commit or share the key. Without a key, the scheduler and retrieval preview work, but Ask PawPal displays a configuration message instead of calling Gemini.
+
+### 5. Start PawPal+
 
 ```bash
 streamlit run app.py
 ```
 
-Without a key, the app and its retrieval layer still run, but Ask PawPal displays a configuration message instead of calling Gemini.
+Create an owner and pet, add one or more care tasks, then use **Ask PawPal** near the bottom of the page.
 
-### Safety note
+## Sample interactions
 
-PawPal+ organizes care tasks; it is not veterinary medical advice. For emergencies, medication questions, diagnoses, or treatment changes, contact a licensed veterinarian.
+Gemini wording can vary between runs. These examples show the expected behavior and the schedule/source context that PawPal provides.
 
-### Suggested workflow
+### 1. Schedule-aware medication reminder
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
+**Input**
 
-## 🖥️ Sample Output
+```text
+How can I organize Mochi's medication reminder with breakfast?
+```
 
-Run `python main.py` to see a terminal demonstration of task sorting, filtering, and conflict warnings. A representative output is included in the demo walkthrough below.
+**Example result**
 
-## 🧪 Testing PawPal+
+```text
+If Mochi already has breakfast scheduled, keep the medication reminder at that same routine point only if that matches the veterinarian's instructions. Add a separate, clearly named medication task so it can be marked complete independently. PawPal can help you avoid a duplicate time-slot conflict, but contact the prescribing veterinarian if you missed a dose or need medication guidance.
+
+Sources retrieved: Medication safety; Routine consistency
+```
+
+### 2. Enrichment planning question
+
+**Input**
+
+```text
+What should I consider before adding an evening enrichment task for Biscuit?
+```
+
+**Example result**
+
+```text
+Review Biscuit's existing evening tasks first, then choose an activity that matches Biscuit's species, age, mobility, and comfort. Start with a short supervised activity and adjust based on how Biscuit responds. Add it as a separate one-time or recurring task so the plan stays visible.
+
+Source retrieved: Enrichment and observation
+```
+
+### 3. Urgent-care guardrail
+
+**Input**
+
+```text
+My pet is having trouble breathing. What should I do?
+```
+
+**Result**
+
+```text
+This may be urgent. Contact an emergency veterinarian or local emergency service now. PawPal cannot diagnose an emergency or replace professional veterinary care.
+```
+
+For this input, PawPal does **not** call Gemini; the guardrail takes priority.
+
+## Design decisions and trade-offs
+
+| Decision | Why | Trade-off |
+| --- | --- | --- |
+| Local JSON knowledge base with keyword retrieval | It is transparent, small, easy to inspect, and ensures the model sees relevant project-provided context. | Keyword matching is less flexible than embedding search and may miss differently worded questions. |
+| Gemini 2.5 Flash | It provides a fast, accessible text-generation option for a student project. | A live response requires an API key and depends on provider availability and limits. |
+| Guardrails before model generation | Urgent symptoms receive immediate escalation instead of a potentially unsafe generative response. | The term-based detector is intentionally narrow and can miss wording it does not recognize. |
+| Source display | It lets the owner inspect the notes that grounded the response. | The local notes are brief and are not a substitute for individualized veterinary advice. |
+| Existing deterministic scheduler remains separate | Sorting, conflicts, recurrence, and completion stay testable without an LLM. | PawPal does not let the model autonomously alter the schedule. |
+
+## Testing and reliability summary
+
+Run the complete automated suite with:
 
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
-```
-python -m pytest
-This command runs the test suite that covers all happy cases such as sorting correctly,
-daily and weekly tasks creating a new instance if completed, one-time tasks not recurring,
-conflicts being detected, and recurring tasks being filtered. It also includes edge cases
-such as equal-time sorting, complete a recurring task twice does not create duplicates,
-completed tasks do not count as conflicts, unkown tasks are False, invalid times are errors,
-and frequency filters handle extra space or reject unsupported values.
-```
-============================================================ test session starts ============================================================
-platform darwin -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /Users/harshpatel/Desktop/AI110/ai110-module2show-pawpal-starter
-plugins: anyio-4.15.1
-collected 19 items                                                                                                                          
-
-tests/test_pawpal.py ...................                                                                                              [100%]
-
-============================================================ 19 passed in 0.02s =============================================================
+python -m pytest -q
 ```
 
-## 📐 Smarter Scheduling
+The current suite has **22 passing tests**. It covers the original scheduler's sorting, filtering, recurrence, conflict detection, validation, and completion behavior. The AI tests verify that a medication question ranks the medication-safety note first, urgent language triggers the guardrail before a model call, and a missing key returns a safe configuration message.
 
-> Fill in once you've implemented scheduling logic.
+The intentionally unautomated portion is the live Gemini request: it requires a personal key, network access, and an active provider account. This is a limitation of the current evaluation approach; a future version should add recorded, human-reviewed test cases for live outputs and measure retrieval quality across a larger question set.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | Scheduler.sort_by_time() | Uses sorted method and lambda to validate by HH:MM |
-| Filtering | Scheduler.filter_tasks() | Filters tasks by copmletion status, pet name, or both. |
-| Conflict handling | Scheduler.detect_conflicts() | Displays warning message when same pet has multiple 
-incomplete tasks on same day and time. Different pets or dates do not conflict. |
-| Recurring tasks | Task.is_recurring() and Task.create_next_occurrence() and Scheduler.get_recurring_tasks() 
-and Scheduler.complete_task() | Daily and weekly tasks new instance after completion unless it's one-time. |
+## Brief reflection
 
-## Implementation Summary
-The app now has all the logic implemented to include Task, Pet, Owner, and Scheduler objects. Task represents
-one task for the pet with a description, time, frequency, completion status, ID, and the pet's name.
-The Pet is the actual pet's information and task list. Owner is the person managing the pets. Scheduler
-is the planning brain that helps the owner organize all tasks, retrieve all tasks, sort, and get a schedule.
-All of these come together to organize all tasks that the owner wants for a specific pet.
+This project showed me that useful AI behavior comes from the surrounding system, not just the model call. Giving Gemini relevant schedule and care-note context, keeping deterministic scheduling logic outside the model, and adding explicit failure paths made the result more understandable and safer to use. The detailed responsible-AI reflection, including AI collaboration and system limitations, is documented in `model_card.md`.
 
-## 📸 Demo Walkthrough
+## License and attribution
 
-The Streamlit app lets a pet owner create or select an owner, add pets, schedule dated care tasks, filter the task list, review recurring tasks, resolve warnings, and mark tasks complete. Completing a daily or weekly task automatically creates its next occurrence.
-
-Example workflow:
-
-1. Create or select an owner, then add a pet such as Mochi.
-2. Add a task by choosing the pet, entering a description, selecting a date and time, and choosing daily, weekly, or one-time frequency.
-3. Use the pet and completion-status controls to view the relevant tasks in a chronological table.
-4. Review recurring tasks and any warning displayed when one pet has more than one incomplete task at the same date and time.
-5. Select Mark complete for a task. The app keeps it in history and creates the next daily or weekly occurrence when applicable.
-
-The terminal demo shows the same scheduler behaviors: tasks are sorted from earliest to latest, filtering can isolate Biscuit's or completed tasks, and a duplicate Mochi time slot produces a non-blocking warning.
-
-```
-Tasks as entered
-================
-17:30 — Mochi: Playtime (complete)
-08:00 — Mochi: Breakfast (incomplete)
-08:00 — Mochi: Give medication (incomplete)
-20:00 — Biscuit: Medication (incomplete)
-07:30 — Biscuit: Morning walk (incomplete)
-
-Sorted by time
-==============
-07:30 — Biscuit: Morning walk (incomplete)
-08:00 — Mochi: Breakfast (incomplete)
-08:00 — Mochi: Give medication (incomplete)
-17:30 — Mochi: Playtime (complete)
-20:00 — Biscuit: Medication (incomplete)
-
-Biscuit's tasks
-===============
-20:00 — Biscuit: Medication (incomplete)
-07:30 — Biscuit: Morning walk (incomplete)
-
-Completed tasks
-===============
-17:30 — Mochi: Playtime (complete)
-
-Today's incomplete schedule
-===========================
-07:30 — Biscuit: Morning walk (incomplete)
-08:00 — Mochi: Breakfast (incomplete)
-08:00 — Mochi: Give medication (incomplete)
-20:00 — Biscuit: Medication (incomplete)
-
-Schedule warnings
-=================
-Warning: Mochi has multiple tasks on 2026-10-11 at 08:00: Breakfast, Give medication.
-```
+This is a student project built as an evolution of the original Module 2 PawPal+ scheduler. The pet-care notes are intentionally short, curated planning guidance and should not be treated as medical sources.
