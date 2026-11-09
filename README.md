@@ -160,7 +160,18 @@ Run the complete automated suite with:
 python -m pytest -q
 ```
 
-The current suite has **22 passing tests**. It covers the original scheduler's sorting, filtering, recurrence, conflict detection, validation, and completion behavior. The AI tests verify that a medication question ranks the medication-safety note first, urgent language triggers the guardrail before a model call, and a missing key returns a safe configuration message.
+The current suite has **25 passing tests**. It covers the original scheduler's sorting, filtering, recurrence, conflict detection, validation, and completion behavior. The AI tests verify that a medication question ranks the medication-safety note first, unrelated questions retrieve no source, blank input is rejected, urgent language triggers the guardrail before a model call, and a missing key returns a safe configuration message.
+
+### Automated evaluation log
+
+| Test case | Reliability criterion | Automated result |
+| --- | --- | --- |
+| Medication-planning question | The medication-safety document ranks first. | Pass |
+| Unrelated question | No local note is falsely presented as a source. | Pass |
+| Blank question | The request is rejected before retrieval or model generation. | Pass |
+| Urgent symptom language | The veterinary guardrail bypasses Gemini, even without an API key. | Pass |
+| Missing `GEMINI_API_KEY` | The app returns a configuration message instead of crashing. | Pass |
+| Full test suite | Scheduler and AI reliability checks complete successfully. | 25/25 passed |
 
 The intentionally unautomated portion is the live Gemini request: it requires a personal key, network access, and an active provider account. This is a limitation of the current evaluation approach; a future version should add recorded, human-reviewed test cases for live outputs and measure retrieval quality across a larger question set.
 

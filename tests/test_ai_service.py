@@ -32,6 +32,33 @@ def test_urgent_terms_trigger_a_veterinary_guardrail() -> None:
     assert requires_urgent_veterinary_help("When should I schedule a walk?") is False
 
 
+def test_retrieval_returns_no_source_when_context_is_missing() -> None:
+    """Unrelated questions should not be presented as grounded in a care note."""
+    documents = [
+        KnowledgeDocument("meds", "Medication safety", "Follow veterinarian directions."),
+    ]
+
+    assert retrieve_knowledge("What constellation is visible tonight?", documents) == []
+
+
+def test_blank_question_is_rejected_safely() -> None:
+    """Empty input must not reach retrieval or the external model."""
+    response = ask_pawpal("   ", Owner("Jordan"), Scheduler())
+
+    assert response.status == "invalid_input"
+    assert response.sources == []
+
+
+def test_urgent_question_bypasses_missing_key_message(monkeypatch) -> None:
+    """Safety escalation takes priority over API configuration or model generation."""
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
+    response = ask_pawpal("My cat collapsed and is not moving.", Owner("Jordan"), Scheduler())
+
+    assert response.status == "guardrail"
+    assert "emergency veterinarian" in response.answer
+
+
 def test_missing_key_returns_configuration_message(monkeypatch) -> None:
     """The app fails safely and still shows retrieved context before key setup."""
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
