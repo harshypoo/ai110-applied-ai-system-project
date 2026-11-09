@@ -177,7 +177,7 @@ The intentionally unautomated portion is the live Gemini request: it requires a 
 
 ## Brief reflection
 
-This project showed me that useful AI behavior comes from the surrounding system, not just the model call. Giving Gemini relevant schedule and care-note context, keeping deterministic scheduling logic outside the model, and adding explicit failure paths made the result more understandable and safer to use. The detailed responsible-AI reflection, including AI collaboration and system limitations, is documented in `model_card.md`.
+This project showed me that useful AI behavior comes from the surrounding system, not just the model call. Giving Gemini relevant schedule and care-note context, keeping deterministic scheduling logic outside the model, and adding explicit failure paths made the result more understandable and safer to use. The detailed responsible-AI reflection, including AI collaboration and system limitations, is documented in [model_card.md](model_card.md).
 
 ## License and attribution
 
