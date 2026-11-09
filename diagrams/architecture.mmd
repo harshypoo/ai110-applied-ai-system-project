@@ -1,0 +1,43 @@
+flowchart LR
+    %% Planned architecture for the applied-AI evolution of PawPal+
+    %% Solid arrows carry application data; dashed arrows are observability/test paths.
+
+    User[Pet owner]
+
+    subgraph App[Streamlit application]
+        UI[Task planner and Ask PawPal interface]
+        Context[Task context builder]
+        Scheduler[Existing scheduling engine]
+        Guardrails[Input validation and safety guardrails]
+        AI[AI response service]
+    end
+
+    subgraph Knowledge[RAG knowledge layer]
+        Retriever[Retriever]
+        Notes[(Curated pet-care notes)]
+    end
+
+    subgraph External[Model provider]
+        Model[LLM API]
+    end
+
+    subgraph Quality[Safety and reliability]
+        Logs[(Application logs)]
+        Tests[Automated scheduler and AI-pipeline tests]
+    end
+
+    User --> UI
+    UI --> Scheduler
+    Scheduler --> Context
+    UI --> Guardrails
+    Guardrails --> Context
+    Context --> Retriever
+    Retriever <--> Notes
+    Retriever --> AI
+    Context --> AI
+    AI <--> Model
+    AI --> UI
+    Guardrails -. records events .-> Logs
+    AI -. records model failures and sources .-> Logs
+    Tests -. verifies .-> Scheduler
+    Tests -. verifies retrieval, guardrails, and failures .-> AI
