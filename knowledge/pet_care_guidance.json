@@ -1,0 +1,22 @@
+[
+  {
+    "id": "routine-consistency",
+    "title": "Routine consistency",
+    "content": "Keep feeding, walks, litter care, and other regular care tasks on a predictable schedule when practical. When a routine changes, make a small, observable adjustment and note how the pet responds. An established veterinarian care plan takes priority over a general planning suggestion."
+  },
+  {
+    "id": "medication-safety",
+    "title": "Medication safety",
+    "content": "Use medications only as directed by the pet's veterinarian. A planner can remind an owner about a prescribed task, but it must not recommend a dosage, a substitute medication, or a change to a treatment plan. Contact the prescribing veterinarian when a dose is missed or a medication question is urgent."
+  },
+  {
+    "id": "enrichment-and-observation",
+    "title": "Enrichment and observation",
+    "content": "Choose enrichment and activity that match the pet's species, age, mobility, and observed comfort. Introduce unfamiliar activities gradually, supervise when appropriate, and stop an activity if the pet appears distressed."
+  },
+  {
+    "id": "urgent-veterinary-help",
+    "title": "Urgent veterinary help",
+    "content": "Signs such as trouble breathing, collapse, seizures, uncontrolled bleeding, suspected poisoning, or severe distress need prompt professional veterinary help. A scheduling assistant cannot diagnose an emergency or replace a veterinarian."
+  }
+]

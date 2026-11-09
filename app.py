@@ -4,6 +4,7 @@ from datetime import date, time
 
 import streamlit as st
 
+from ai_service import ask_pawpal
 from pawpal_system import Owner, Pet, Scheduler, Task
 
 
@@ -182,3 +183,30 @@ with st.expander("Current pet tasks"):
                     st.rerun()
         else:
             st.caption("No tasks yet.")
+
+st.divider()
+st.subheader("5. Ask PawPal")
+st.caption(
+    "PawPal retrieves relevant local care notes and your current schedule before asking Gemini. "
+    "It is a planning aid, not veterinary advice."
+)
+with st.form("ask_pawpal_form", clear_on_submit=True):
+    question = st.text_area(
+        "What would you like help planning?",
+        placeholder="e.g., How can I organize Mochi's medication reminder with breakfast?",
+    )
+    ask_question = st.form_submit_button("Ask PawPal")
+
+if ask_question:
+    ai_response = ask_pawpal(question, active_owner, st.session_state.scheduler)
+    if ai_response.status == "guardrail":
+        st.error(ai_response.answer)
+    elif ai_response.status in {"configuration_needed", "model_error", "invalid_input"}:
+        st.info(ai_response.answer)
+    else:
+        st.markdown(ai_response.answer)
+
+    if ai_response.sources:
+        with st.expander("Sources retrieved for this answer"):
+            for source in ai_response.sources:
+                st.write(f"**{source.title}** — {source.content}")

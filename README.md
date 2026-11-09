@@ -1,4 +1,15 @@
-# PawPal+ (Module 2 Project)
+# PawPal+ — Applied AI System Project
+
+PawPal+ is a Streamlit pet-care planner enhanced with **retrieval-augmented generation (RAG)**. Its Ask PawPal feature retrieves relevant, curated pet-care notes and the owner's current schedule before Gemini generates a planning response. This is an evolution of the earlier Module 2 scheduler.
+
+## AI system features
+
+- **Integrated RAG:** `ai_service.py` retrieves relevant notes from `knowledge/pet_care_guidance.json`, supplies them with task context to Gemini, and shows the sources in the interface.
+- **Guardrails:** Urgent symptom terms bypass model generation and direct the owner to urgent veterinary help. The prompt prohibits diagnosis, medication-dose advice, and treatment-plan changes.
+- **Logging and failure handling:** The AI service logs event outcomes without logging the question text. Missing keys and Gemini errors show safe, actionable UI messages.
+- **Reliability tests:** `tests/test_ai_service.py` checks retrieval relevance, emergency guardrails, and missing-key behavior.
+
+See [the Mermaid architecture source](diagrams/architecture.mmd) for the component and data flow.
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
 
@@ -41,6 +52,23 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+### Configure Gemini
+
+1. Create a Gemini API key in Google AI Studio.
+2. Copy `.env.example` to a new local `.env` file.
+3. Set `GEMINI_API_KEY` in `.env`. Do not commit this file.
+4. Start the application:
+
+```bash
+streamlit run app.py
+```
+
+Without a key, the app and its retrieval layer still run, but Ask PawPal displays a configuration message instead of calling Gemini.
+
+### Safety note
+
+PawPal+ organizes care tasks; it is not veterinary medical advice. For emergencies, medication questions, diagnoses, or treatment changes, contact a licensed veterinarian.
 
 ### Suggested workflow
 
