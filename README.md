@@ -1,10 +1,12 @@
 # PawPal+ — RAG Pet-Care Planning Assistant
 
+## Title and Summary
+
 PawPal+ helps pet owners organize recurring care tasks and ask grounded planning questions about their current routine. It combines a Streamlit task planner with retrieval-augmented generation (RAG): before Gemini responds, PawPal retrieves relevant local care notes and sends them alongside the owner's actual task schedule. This makes the response more useful than a generic chatbot answer while keeping the original scheduler at the center of the experience.
 
 > **Safety note:** PawPal+ is a planning aid, not veterinary medical advice. It does not diagnose conditions, recommend medication doses, or advise treatment changes. Urgent symptoms should be handled by a licensed veterinarian or emergency veterinary service.
 
-## Original project: Module 2 PawPal+ scheduler
+## Original Project (from Modules 1–3)
 
 This project evolves my Module 2 project, **PawPal+**, a Streamlit app for organizing pet-care tasks. The original application let an owner create pets, add dated one-time or recurring tasks, sort and filter a schedule, detect conflicting time slots, and mark tasks complete. Its goal was to turn a busy owner's basic care list into a clear, manageable routine.
 
@@ -16,7 +18,7 @@ This project evolves my Module 2 project, **PawPal+**, a Streamlit app for organ
 - **Transparent sources:** The app displays the retrieved notes below each response.
 - **Safety and resilience:** Urgent symptom terms bypass generation, missing keys and API failures produce useful messages, and the service logs outcomes without logging question text.
 
-## Architecture overview
+## Architecture Overview
 
 The [system architecture diagram](diagrams/architecture.mmd) shows the full flow. A pet owner submits a question in Streamlit; PawPal validates it, builds task context, retrieves relevant local care notes, and sends both to Gemini 3.5 Flash-Lite. The answer and source notes return to the owner for review. Urgent-care guardrails bypass Gemini, while automated tests check retrieval, guardrails, and missing-key behavior; logs record success or failure without storing the question itself.
 
@@ -38,7 +40,7 @@ The [system architecture diagram](diagrams/architecture.mmd) shows the full flow
 └── requirements.txt
 ```
 
-## Setup and run
+## Setup Instructions
 
 ### 1. Clone the repository
 
@@ -100,7 +102,7 @@ python examples/run_evidence.py
 
 The complete captured output is stored in [evidence/final_execution.md](evidence/final_execution.md). Gemini wording can vary between runs, but the response status, retrieved-source labels, and guardrail behavior should remain consistent.
 
-## Observed sample interactions
+## Sample Interactions
 
 The following two live RAG outputs and guardrail output were captured with the documented demo schedule.
 
@@ -156,7 +158,7 @@ This may be urgent. Contact an emergency veterinarian or local emergency service
 
 For this input, PawPal does **not** call Gemini; the guardrail takes priority.
 
-## Design decisions and trade-offs
+## Design Decisions
 
 | Decision | Why | Trade-off |
 | --- | --- | --- |
@@ -166,7 +168,7 @@ For this input, PawPal does **not** call Gemini; the guardrail takes priority.
 | Source display | It lets the owner inspect the notes that grounded the response. | The local notes are brief and are not a substitute for individualized veterinary advice. |
 | Existing deterministic scheduler remains separate | Sorting, conflicts, recurrence, and completion stay testable without an LLM. | PawPal does not let the model autonomously alter the schedule. |
 
-## Testing and reliability summary
+## Testing Summary
 
 Run the complete automated suite with:
 
@@ -198,7 +200,7 @@ The live Gemini workflow was manually exercised for the two planning cases in th
 
 See [presentation_outline.md](presentation_outline.md) for a timed 5–7 minute presentation and live-demo script. A Loom walkthrough can be added here later for human reviewers; grading evidence is included in this README and the linked execution log.
 
-## Brief reflection
+## Reflection
 
 This project showed me that useful AI behavior comes from the surrounding system, not just the model call. Giving Gemini relevant schedule and care-note context, keeping deterministic scheduling logic outside the model, and adding explicit failure paths made the result more understandable and safer to use. The detailed responsible-AI reflection, including AI collaboration and system limitations, is documented in [model_card.md](model_card.md).
 
