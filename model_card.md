@@ -32,3 +32,9 @@ I accepted the suggestion to use a RAG approach. Keeping a small local knowledge
 
 I did not keep the first provider suggestion as written. The initial plan used an OpenAI API integration, but I revised the implementation to use Gemini because the project needed a free tier option. I also kept retrieval as a simple local keyword matcher instead of adding embeddings or an autonomous agent. That choice is easier to understand, and it is easier to inspect, test, and explain for this project.
 
+## Future Improvements
+
+- Expand the local knowledge base with more information to answer questions
+- Compare semantic retrieval with the current keyword retrieval while keeping displayed sources transparent
+- Add human review for Gemini responses, including safety criteria
+

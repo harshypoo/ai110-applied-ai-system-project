@@ -1,6 +1,6 @@
 # Final Execution Evidence
 
-This file records the commands used for final verification. The live response wording may vary because Gemini is generative; source labels and guardrail behavior should remain consistent.
+This file records the commands used for final verification. The response wording may vary because Gemini can change from run to run, but source labels and guardrail behavior should remain consistent.
 
 ## Automated suite
 
